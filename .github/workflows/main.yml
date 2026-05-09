@@ -4,14 +4,20 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          ref: master
+          python-version: '3.x'
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -19,13 +25,18 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Build Games
+      - name: Install Dependencies
         run: |
-          # Twoje repozytorium używa Makefile zamiast make.py
+          # To pobierze brakujące pliki do appengine/third-party/
+          make deps
+
+      - name: Build Maze
+        run: |
+          # Teraz, gdy biblioteki są na miejscu, budowanie przejdzie
           make maze
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          name: blockly-games-build
-          path: appengine/
+          folder: appengine
+          branch: gh-pages
