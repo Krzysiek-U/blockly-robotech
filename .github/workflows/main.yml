@@ -1,31 +1,40 @@
 name: Build and Deploy Blockly Robotech
 on:
   push:
-    branches: [ main, master ] # upewnij się, że nazwa gałęzi się zgadza
+    branches: [ main, master ]
+  workflow_dispatch: # Pozwala uruchomić budowanie ręcznie przyciskiem
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
       - name: Install Dependencies
         run: |
-          # Blockly Games wymaga pobrania dodatkowych bibliotek
+          # Pobieranie niezbędnych bibliotek Blockly
           python3 make.py deps
 
       - name: Build Maze
         run: |
-          # Kompilujemy konkretną grę - Maze
+          # Kompilacja gry Maze
           python3 make.py maze
 
       - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v2
+          # Używamy najnowszej wersji v4 dla artefaktów
+        uses: actions/upload-artifact@v4
         with:
-          path: 'appengine/' # tu znajdują się gotowe pliki gry
+          name: blockly-games-build
+          path: appengine/
