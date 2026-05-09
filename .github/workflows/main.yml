@@ -2,11 +2,13 @@ name: Build and Deploy Blockly Robotech
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch: # Pozwala uruchomić budowanie ręcznie przyciskiem
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Rozwiązuje problem z ostrzeżeniem o Node 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -14,26 +16,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.10'
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17' # Wyższa wersja Javy dla lepszej stabilności kompilatora
 
       - name: Install Dependencies
         run: |
-          # Pobieranie niezbędnych bibliotek Blockly
           python3 make.py deps
 
       - name: Build Maze
         run: |
-          # Kompilacja gry Maze
+          # Uruchamiamy kompilację Maze
           python3 make.py maze
 
       - name: Upload Artifacts
-          # Używamy najnowszej wersji v4 dla artefaktów
         uses: actions/upload-artifact@v4
         with:
           name: blockly-games-build
