@@ -14,6 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install SVN
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y subversion
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -27,12 +32,10 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # To pobierze brakujące pliki do appengine/third-party/
           make deps
 
       - name: Build Maze
         run: |
-          # Teraz, gdy biblioteki są na miejscu, budowanie przejdzie
           make maze
 
       - name: Deploy to GitHub Pages
