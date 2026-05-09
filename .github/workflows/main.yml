@@ -1,7 +1,7 @@
 name: Build and Deploy Blockly Robotech
 on:
   push:
-    branches: [ "**" ] # Reaguj na każdą gałąź
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -10,40 +10,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Debug - List files
-        run: |
-          echo "Gdzie ja jestem?"
-          pwd
-          echo "Co tu jest?"
-          ls -R
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          ref: master
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
 
-      - name: Install Dependencies
+      - name: Build Games
         run: |
-          # Jeśli plik jest głębiej, znajdziemy go
-          FILE=$(find . -name "make.py" -print -quit)
-          if [ -z "$FILE" ]; then
-            echo "BŁĄD: Nie znaleziono make.py w żadnym folderze!"
-            exit 1
-          fi
-          DIR=$(dirname "$FILE")
-          cd "$DIR"
-          python3 make.py deps
-          python3 make.py maze
+          # Twoje repozytorium używa Makefile zamiast make.py
+          make maze
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: blockly-games-build
-          path: "**/appengine/"
+          path: appengine/
