@@ -1,17 +1,17 @@
 name: Build and Deploy Blockly Robotech
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master ] # Blockly Games domyślnie używa master
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Rozwiązuje problem z ostrzeżeniem o Node 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: master # Wymuszamy pobranie gałęzi master
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # Wyższa wersja Javy dla lepszej stabilności kompilatora
+          java-version: '17'
 
       - name: Install Dependencies
         run: |
@@ -30,7 +30,6 @@ jobs:
 
       - name: Build Maze
         run: |
-          # Uruchamiamy kompilację Maze
           python3 make.py maze
 
       - name: Upload Artifacts
