@@ -1,0 +1,31 @@
+name: Build and Deploy Blockly Robotech
+on:
+  push:
+    branches: [ main, master ] # upewnij się, że nazwa gałęzi się zgadza
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          # Blockly Games wymaga pobrania dodatkowych bibliotek
+          python3 make.py deps
+
+      - name: Build Maze
+        run: |
+          # Kompilujemy konkretną grę - Maze
+          python3 make.py maze
+
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'appengine/' # tu znajdują się gotowe pliki gry
