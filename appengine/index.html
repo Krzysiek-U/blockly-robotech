@@ -1,16 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <meta name="google" value="notranslate">
-  <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="description" content="Games for tomorrow's programmers.  Block-based programming lessons for beginners.  Free from Google.">
-  <title>Blockly Games</title>
-  <link rel="stylesheet" href="common/common.css">
-  <link rel="stylesheet" href="index/style.css">
-  <script src="common/boot.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotech - Akademia Programowania</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #2c3e50;
+        }
+        header {
+            background-color: #004a99;
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .card-image {
+            height: 180px;
+            background-color: #e0e6ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+        .card-content {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #004a99;
+        }
+        .card-desc {
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-  <noscript>Blockly Games requires JavaScript.</noscript>
+
+<header>
+    <h1>ROBOTECH.EDU.PL</h1>
+    <p>Akademia Młodego Wynalazcy</p>
+</header>
+
+<div class="container">
+    <!-- GRA 1: PUZZLE -->
+    <a href="puzzle.html" class="card">
+        <div class="card-image">🧩</div>
+        <div class="card-content">
+            <span class="badge">Poziom: Podstawowy</span>
+            <div class="card-title">Wielcy Wynalazcy</div>
+            <p class="card-desc">Poznaj Teslę, Da Vinci i innych! Dopasuj wynalazki do ich twórców w formie puzzli.</p>
+        </div>
+    </a>
+
+    <!-- GRA 2: MAZE (LABIRYNT) -->
+    <a href="maze.html" class="card">
+        <div class="card-image">🤖</div>
+        <div class="card-content">
+            <span class="badge">Poziom: Średni</span>
+            <div class="card-title">Misja Robota</div>
+            <p class="card-desc">Zaprogramuj ruch robota przez labirynt. Naucz się sekwencji, pętli i instrukcji warunkowych.</p>
+        </div>
+    </a>
+
+    <!-- GRA 3: NADCHODZĄCE -->
+    <div class="card" style="opacity: 0.6; cursor: default;">
+        <div class="card-image">🚀</div>
+        <div class="card-content">
+            <span class="badge" style="background: #7f8c8d;">Wkrótce</span>
+            <div class="card-title">Kosmiczna Misja</div>
+            <p class="card-desc">Zaawansowane programowanie sensorów i unikanie przeszkód na Marsie.</p>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
