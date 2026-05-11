@@ -10,30 +10,30 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Używamy nowszego obrazu Bullseye, który ma działające repozytoria
     container:
-      image: python:2.7-bullseye
+      # Ten obraz istnieje, ale naprawimy w nim repozytoria w pierwszym kroku
+      image: python:2.7-buster
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Build Tools
+      - name: Fix Repos and Install Tools
         run: |
-          # Bullseye ma sprawne serwery, więc update przejdzie bez błędu 100
+          # Naprawa starych repozytoriów Debiana (przełączenie na archive.debian.org)
+          sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list
+          sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list
+          sed -i '/stretch-updates/d' /etc/apt/sources.list
+          
           apt-get update
           apt-get install -y subversion default-jre-headless
 
       - name: Build Maze
         run: |
-          # Budowanie gier
-          make deps || echo "Problemy z SVN - ignoruję"
+          make deps || echo "Ignoruję błędy SVN"
           make maze-pl
 
       - name: Deploy
-        # Ta akcja musi zostać uruchomiona po wyjściu z kontenera Pythona, 
-        # dlatego używamy mechanizmu upload/download artifact lub budujemy wszystko w jednym kroku.
-        # Dla uproszczenia: spróbujmy odpalić to wewnątrz, jeśli Node na to pozwoli.
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
