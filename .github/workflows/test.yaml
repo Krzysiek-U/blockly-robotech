@@ -1,4 +1,4 @@
-name: Build and Deploy Blockly
+name: Build
 on:
   push:
     branches: [ master ]
@@ -6,27 +6,26 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 jobs:
-  build-and-deploy:
+  build-n-deploy:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Tools
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: Setup
         run: |
-          sudo fuser -kk /var/lib/dpkg/lock-frontend || true
           sudo apt-get update -y
           sudo apt-get install -y subversion python2-minimal default-jre
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build
         run: |
-          make deps || echo "SVN error"
+          make deps || echo "Skip deps"
           make maze-pl
 
- 
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./appengine
