@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Deploy Blockly
 on:
   push:
     branches: [ master ]
@@ -6,29 +6,32 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 jobs:
-  build:
-    # Wracamy do 20.04, bo tylko tu ręczna instalacja pythona2 zadziała
-    runs-on: ubuntu-20.04
+  build-and-deploy:
+    # Używamy najnowszego systemu, żeby nie czekać w kolejce
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install Legacy Tools
+      - name: Install Python 2.7 (Legacy Support)
         run: |
+          # Pobieramy Pythona 2 z archiwów, bo ubuntu-latest go nie ma
           sudo apt-get update
-          # Instalujemy pythona2 bezpośrednio z apt
           sudo apt-get install -y python2-minimal subversion default-jre
-          # Ustawiamy go jako domyślny 'python' dla Makefile
+          # Tworzymy alias dla Makefile
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobieranie zależności i kompilacja
-          make deps || echo "SVN error - ignoruję"
+          # Pobieranie bibliotek (ignorujemy błędy sieciowe SVN)
+          make deps || echo "SVN error - kontynuuję z tym co jest"
+          # Kompilacja Labiryntu
           make maze-pl
 
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
