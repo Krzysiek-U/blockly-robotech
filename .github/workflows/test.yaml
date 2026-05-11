@@ -1,4 +1,4 @@
-name: Build
+name: Build and Deploy
 on:
   push:
     branches: [ master ]
@@ -8,20 +8,32 @@ permissions:
   contents: write
 
 jobs:
-  build-n-deploy:
-    runs-on: ubuntu-20.04
+  build:
+    # 22.04 jest nowsze, ale wciąż pozwala na instalację Pythona 2 przez akcję
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup
+      - name: Setup Python 2.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: '2.7'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install Subversion
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y subversion python2-minimal default-jre
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          sudo apt-get update
+          sudo apt-get install -y subversion
 
       - name: Build
         run: |
-          make deps || echo "Skip deps"
+          # Blockly Games używa komendy 'python', akcja setup-python tworzy alias automatycznie
+          make deps || echo "Ignoruję błędy SVN"
           make maze-pl
 
       - name: Deploy
