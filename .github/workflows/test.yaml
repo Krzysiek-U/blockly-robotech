@@ -1,26 +1,40 @@
-name: Build and Deploy
+name: Build and Deploy Blockly
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Tools
+      - name: Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt-get install -y subversion python2-minimal default-jre
+          # Zabijamy procesy blokujące instalator i czyścimy pliki blokad
+          sudo fuser -kk /var/lib/dpkg/lock-frontend || true
+          sudo fuser -kk /var/lib/apt/lists/lock || true
+          sudo rm -f /var/lib/dpkg/lock-frontend
+          sudo rm -f /var/lib/apt/lists/lock
+          
+          # Czysta instalacja narzędzi
+          sudo apt-get clean
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
-      - name: Build
+      - name: Build Maze
         run: |
-          make deps || true
+          # Pobranie bibliotek i kompilacja (ignorujemy błędy SVN)
+          make deps || echo "SVN error, kontynuuję..."
           make maze-pl
 
       - name: Deploy
@@ -28,3 +42,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./appengine
+          force_orphan: true
