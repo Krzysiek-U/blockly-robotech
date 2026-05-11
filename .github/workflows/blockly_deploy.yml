@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    # Używamy starszej wersji Ubuntu, która ma wsparcie dla Pythona 2.7
+    # ZMIANA: Używamy starszej wersji systemu, która wspiera Pythona 2.7
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -15,13 +15,14 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          # Na Ubuntu 20.04 python2 jest nadal łatwo dostępny
+          # Na Ubuntu 20.04 te pakiety zainstalują się bez problemu
           sudo apt-get install -y subversion python2-minimal default-jre
+          # Ustawiamy alias, żeby komenda 'python' wskazywała na wersję 2
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobieranie zależności i kompilacja
+          # Pobieranie zależności i kompilacja Labiryntu
           make deps || true
           make maze-pl
 
