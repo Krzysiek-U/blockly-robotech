@@ -10,9 +10,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Używamy gotowego kontenera ze starym Debianem, który ma wszystko czego potrzebujesz
+    # Używamy nowszego obrazu Bullseye, który ma działające repozytoria
     container:
-      image: python:2.7-slim-buster
+      image: python:2.7-bullseye
 
     steps:
       - name: Checkout code
@@ -20,18 +20,20 @@ jobs:
 
       - name: Install Build Tools
         run: |
+          # Bullseye ma sprawne serwery, więc update przejdzie bez błędu 100
           apt-get update
-          # Instalujemy SVN i Javę (niezbędna do kompilatora Closure)
           apt-get install -y subversion default-jre-headless
-          # W tym kontenerze 'python' to już wersja 2.7, więc nie trzeba aliasów
 
       - name: Build Maze
         run: |
-          make deps || echo "Ignoruję błędy SVN"
+          # Budowanie gier
+          make deps || echo "Problemy z SVN - ignoruję"
           make maze-pl
 
       - name: Deploy
-        # Musimy wyjść z kontenera, żeby użyć akcji Deploy (ona wymaga nowszego Node.js)
+        # Ta akcja musi zostać uruchomiona po wyjściu z kontenera Pythona, 
+        # dlatego używamy mechanizmu upload/download artifact lub budujemy wszystko w jednym kroku.
+        # Dla uproszczenia: spróbujmy odpalić to wewnątrz, jeśli Node na to pozwoli.
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
