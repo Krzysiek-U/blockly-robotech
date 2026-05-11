@@ -1,0 +1,34 @@
+name: Deploy Blockly to Pages
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python 2 and Subversion
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y subversion python2-minimal
+          sudo ln -s /usr/bin/python2 /usr/bin/python
+
+      - name: Build Games
+        run: |
+          make deps
+          make maze-pl
+          # Tutaj gra generuje pliki compressed.js i pl.js w folderze appengine/maze/
+
+      - name: Copy Custom JSON
+        run: |
+          # Kopiujemy Twoje JSONy do folderu budowy, aby były dostępne przez fetch()
+          cp -r json appengine/ || echo "Brak folderu json, pomijam..."
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./appengine
