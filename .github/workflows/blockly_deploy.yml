@@ -13,18 +13,18 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # Próba naprawy błędu 100 poprzez czyszczenie i wymuszenie aktualizacji
+          # Czyścimy listy pakietów, które mogą być uszkodzone
           sudo rm -rf /var/lib/apt/lists/*
+          # Wymuszamy aktualizację i instalację bez pytań
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre
-          # Ustawienie Pythona 2
+          sudo apt-get install -y -f subversion python2-minimal default-jre
+          # Ustawiamy alias dla Pythona
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # make deps często wywala błędy sieciowe przy svn, używamy '|| true' żeby iść dalej
+          # Pobranie bibliotek i kompilacja Labiryntu
           make deps || true
-          # Główna kompilacja
           make maze-pl
 
       - name: Deploy to GitHub Pages
