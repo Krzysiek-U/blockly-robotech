@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Simple Deploy
 on:
   push:
     branches: [ master ]
@@ -8,32 +8,11 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    container:
-      # Ten obraz istnieje, ale naprawimy w nim repozytoria w pierwszym kroku
-      image: python:2.7-buster
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Fix Repos and Install Tools
-        run: |
-          # Naprawa starych repozytoriów Debiana (przełączenie na archive.debian.org)
-          sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list
-          sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list
-          sed -i '/stretch-updates/d' /etc/apt/sources.list
-          
-          apt-get update
-          apt-get install -y subversion default-jre-headless
-
-      - name: Build Maze
-        run: |
-          make deps || echo "Ignoruję błędy SVN"
-          make maze-pl
-
-      - name: Deploy
+      - uses: actions/checkout@v4
+      - name: Deploy to Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
