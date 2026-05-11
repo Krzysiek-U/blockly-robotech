@@ -19,22 +19,18 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          # Pętla próbująca odblokować i zainstalować narzędzia (naprawa błędu 100)
           for i in {1..5}; do
             sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock
             sudo apt-get update -y && \
             sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre && \
             break || \
-            (echo "System zablokowany, próba $i z 5 za 10 sekund..." && sleep 10)
+            (echo "System zablokowany, próba $i..." && sleep 5)
           done
-          # Ustawienie aliasu dla Pythona 2
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobieranie bibliotek (ignorujemy błędy sieciowe SVN)
-          make deps || echo "Problemy z SVN, ale próbuję dalej..."
-          # Kompilacja Labiryntu w wersji polskiej
+          make deps || echo "SVN error"
           make maze-pl
 
       - name: Deploy
