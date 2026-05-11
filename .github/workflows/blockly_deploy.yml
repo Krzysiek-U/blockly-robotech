@@ -12,18 +12,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          # Czyścimy listy pakietów, które mogą być uszkodzone
+          # Usuwamy wszelkie blokady i stare listy pakietów
           sudo rm -rf /var/lib/apt/lists/*
-          # Wymuszamy aktualizację i instalację bez pytań
+          sudo apt-get clean
+          # Instalacja z wymuszeniem braku pytań i naprawą zależności
           sudo apt-get update -y
-          sudo apt-get install -y -f subversion python2-minimal default-jre
-          # Ustawiamy alias dla Pythona
+          sudo apt-get install -y -f --no-install-recommends subversion python2-minimal default-jre
+          # Ustawienie aliasu dla Pythona
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobranie bibliotek i kompilacja Labiryntu
+          # Próba pobrania i budowania, ignorujemy błędy sieciowe SVN
           make deps || true
           make maze-pl
 
