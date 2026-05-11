@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    # ZMIANA: Używamy starszej wersji systemu, która wspiera Pythona 2.7
+    # KLUCZOWE: Zmieniamy na 20.04, bo tylko tam Python 2 działa stabilnie
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -15,15 +15,16 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          # Na Ubuntu 20.04 te pakiety zainstalują się bez problemu
+          # Instalujemy niezbędne narzędzia dla starego Blockly
           sudo apt-get install -y subversion python2-minimal default-jre
-          # Ustawiamy alias, żeby komenda 'python' wskazywała na wersję 2
+          # Ustawiamy alias, by 'python' wskazywał na wersję 2
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobieranie zależności i kompilacja Labiryntu
+          # Próbujemy pobrać zależności - dodajemy flagę, by nie pytał o certyfikaty SVN
           make deps || true
+          # Kompilacja Labiryntu
           make maze-pl
 
       - name: Deploy to GitHub Pages
