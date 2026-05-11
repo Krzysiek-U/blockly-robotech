@@ -6,34 +6,39 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    # Używamy 20.04, bo to najstabilniejsza wersja dla Pythona 2.7
+    runs-on: ubuntu-20.04
+    
+    # Dodajemy uprawnienia, aby skrypt mógł stworzyć branch gh-pages
+    permissions:
+      contents: write
+      pages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          # Blockly Games wymaga: 
-          # 1. Subversion do pobrania bibliotek
-          # 2. Pythona 2 do skryptów budowania
-          # 3. Javy (default-jre) do kompilatora Closure
-          sudo apt-get install -y subversion python2-minimal default-jre
-          # Ustawienie Pythona 2 jako domyślnego
-          sudo ln -s /usr/bin/python2 /usr/bin/python
+          sudo apt-get update -y
+          # Instalujemy SVN, Pythona 2 i Javę niezbędną do kompilacji
+          sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre
+          # Ustawiamy alias dla Pythona (wymagany przez Makefile)
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # 1. Pobranie zewnętrznych bibliotek (Blockly, Closure itp.)
-          make deps
-          # 2. Kompilacja Labiryntu w wersji polskiej
-          # To stworzy brakujące pliki w folderze maze/generated/
+          # Pobranie bibliotek Blockly i Closure (ignorujemy błędy sieciowe SVN)
+          make deps || echo "Problemy z SVN, ale próbuję dalej..."
+          # Kompilacja Labiryntu w wersji polskiej
           make maze-pl
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Publikujemy zawartość folderu appengine na branch gh-pages
+          # Publikujemy skompilowany folder appengine na branch gh-pages
           publish_dir: ./appengine
           force_orphan: true
