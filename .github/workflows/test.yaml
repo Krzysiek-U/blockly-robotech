@@ -9,31 +9,23 @@ permissions:
 
 jobs:
   build:
-    # 22.04 jest nowsze, ale wciąż pozwala na instalację Pythona 2 przez akcję
-    runs-on: ubuntu-22.04
+    # Wracamy do 20.04, bo tylko tu ręczna instalacja pythona2 zadziała
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 2.7
-        uses: actions/setup-python@v5
-        with:
-          python-version: '2.7'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-
-      - name: Install Subversion
+      - name: Install Legacy Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y subversion
+          # Instalujemy pythona2 bezpośrednio z apt
+          sudo apt-get install -y python2-minimal subversion default-jre
+          # Ustawiamy go jako domyślny 'python' dla Makefile
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
 
-      - name: Build
+      - name: Build Maze
         run: |
-          # Blockly Games używa komendy 'python', akcja setup-python tworzy alias automatycznie
-          make deps || echo "Ignoruję błędy SVN"
+          # Pobieranie zależności i kompilacja
+          make deps || echo "SVN error - ignoruję"
           make maze-pl
 
       - name: Deploy
@@ -41,3 +33,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./appengine
+          force_orphan: true
