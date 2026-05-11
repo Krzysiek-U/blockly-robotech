@@ -1,4 +1,4 @@
-name: Deploy Blockly
+name: Build and Deploy
 on:
   push:
     branches: [ master ]
@@ -8,14 +8,38 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build:
+    # 20.04 to ostatni system z dobrym wsparciem dla Pythona 2 w Actions
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Deploy to GitHub Pages
+      # Używamy oficjalnej akcji zamiast apt-get (unika błędu 100)
+      - name: Setup Python 2.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: '2.7'
+
+      # Java jest niezbędna do kompilatora Closure
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install SVN
+        run: sudo apt-get update && sudo apt-get install -y subversion
+
+      - name: Build Maze
+        run: |
+          # Pobieranie bibliotek (Blockly, Closure)
+          make deps || echo "Ignoruję błędy SVN"
+          # Kompilacja Labiryntu - to stworzy pliki w maze/generated/
+          make maze-pl
+
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./appengine
+          force_orphan: true
