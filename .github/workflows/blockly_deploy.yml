@@ -13,22 +13,23 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get update || true
-          # SVN do pobierania, Python 2 do skryptów, JRE do kompilatora Closure
+          # Próba naprawy błędu 100 poprzez czyszczenie i wymuszenie aktualizacji
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre
+          # Ustawienie Pythona 2
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobranie bibliotek (Blockly itp.)
-          make deps
-          # Kompilacja Labiryntu w wersji polskiej
+          # make deps często wywala błędy sieciowe przy svn, używamy '|| true' żeby iść dalej
+          make deps || true
+          # Główna kompilacja
           make maze-pl
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Publikujemy zawartość folderu appengine na branch gh-pages
           publish_dir: ./appengine
           force_orphan: true
