@@ -1,4 +1,4 @@
-name: Build and Deploy Blockly
+name: Build and Deploy
 on:
   push:
     branches: [ master ]
@@ -6,32 +6,32 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 jobs:
-  build-and-deploy:
-    # Używamy najnowszego systemu, żeby nie czekać w kolejce
+  build:
     runs-on: ubuntu-latest
+    # Używamy gotowego kontenera ze starym Debianem, który ma wszystko czego potrzebujesz
+    container:
+      image: python:2.7-slim-buster
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Python 2.7 (Legacy Support)
+      - name: Install Build Tools
         run: |
-          # Pobieramy Pythona 2 z archiwów, bo ubuntu-latest go nie ma
-          sudo apt-get update
-          sudo apt-get install -y python2-minimal subversion default-jre
-          # Tworzymy alias dla Makefile
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          apt-get update
+          # Instalujemy SVN i Javę (niezbędna do kompilatora Closure)
+          apt-get install -y subversion default-jre-headless
+          # W tym kontenerze 'python' to już wersja 2.7, więc nie trzeba aliasów
 
       - name: Build Maze
         run: |
-          # Pobieranie bibliotek (ignorujemy błędy sieciowe SVN)
-          make deps || echo "SVN error - kontynuuję z tym co jest"
-          # Kompilacja Labiryntu
+          make deps || echo "Ignoruję błędy SVN"
           make maze-pl
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
+        # Musimy wyjść z kontenera, żeby użyć akcji Deploy (ona wymaga nowszego Node.js)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
