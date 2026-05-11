@@ -4,16 +4,13 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   build-and-deploy:
-    # Używamy 20.04, bo to najstabilniejsza wersja dla Pythona 2.7
     runs-on: ubuntu-20.04
-    
-    # Dodajemy uprawnienia, aby skrypt mógł stworzyć branch gh-pages
-    permissions:
-      contents: write
-      pages: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,23 +19,28 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          # Siłowe usuwanie blokad systemowych (naprawa błędu 100)
+          sudo fuser -kk /var/lib/dpkg/lock-frontend || true
+          sudo fuser -kk /var/lib/apt/lists/lock || true
+          sudo rm -f /var/lib/dpkg/lock-frontend
+          sudo rm -f /var/lib/apt/lists/lock
+          
+          # Czysta instalacja
+          sudo apt-get clean
           sudo apt-get update -y
-          # Instalujemy SVN, Pythona 2 i Javę niezbędną do kompilacji
           sudo apt-get install -y --no-install-recommends subversion python2-minimal default-jre
-          # Ustawiamy alias dla Pythona (wymagany przez Makefile)
           sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Pobranie bibliotek Blockly i Closure (ignorujemy błędy sieciowe SVN)
-          make deps || echo "Problemy z SVN, ale próbuję dalej..."
-          # Kompilacja Labiryntu w wersji polskiej
+          # Pobieranie bibliotek (ignorujemy błędy sieciowe SVN)
+          make deps || echo "Problemy z SVN, ale kontynuuję..."
+          # Kompilacja Labiryntu
           make maze-pl
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Publikujemy skompilowany folder appengine na branch gh-pages
           publish_dir: ./appengine
           force_orphan: true
