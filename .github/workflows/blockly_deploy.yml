@@ -11,22 +11,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      # Zamiast apt-get, używamy gotowej akcji do Javy (potrzebna do kompilatora)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      # Zamiast apt-get, używamy akcji do Pythona 2
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: '2.7'
+
+      - name: Install Subversion
         run: |
-          # Usuwamy wszelkie blokady i stare listy pakietów
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt-get clean
-          # Instalacja z wymuszeniem braku pytań i naprawą zależności
-          sudo apt-get update -y
-          sudo apt-get install -y -f --no-install-recommends subversion python2-minimal default-jre
-          # Ustawienie aliasu dla Pythona
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          sudo apt-get update
+          sudo apt-get install -y subversion
 
       - name: Build Maze
         run: |
-          # Próba pobrania i budowania, ignorujemy błędy sieciowe SVN
+          # Próbujemy pobrać zależności i budować
           make deps || true
           make maze-pl
 
