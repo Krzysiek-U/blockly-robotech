@@ -6,32 +6,22 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    # Używamy starszej wersji Ubuntu, która ma wsparcie dla Pythona 2.7
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Zamiast apt-get, używamy gotowej akcji do Javy (potrzebna do kompilatora)
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-
-      # Zamiast apt-get, używamy akcji do Pythona 2
-      - name: Set up Python 2.7
-        uses: actions/setup-python@v5
-        with:
-          python-version: '2.7'
-
-      - name: Install Subversion
+      - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y subversion
+          # Na Ubuntu 20.04 python2 jest nadal łatwo dostępny
+          sudo apt-get install -y subversion python2-minimal default-jre
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Build Maze
         run: |
-          # Próbujemy pobrać zależności i budować
+          # Pobieranie zależności i kompilacja
           make deps || true
           make maze-pl
 
